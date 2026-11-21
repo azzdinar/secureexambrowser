@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Ujian Online</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #ffffff;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        /* ==================== MODE GENERATOR (GURU) ==================== */
+        #genApp {
+            padding: 24px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 740px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 26px 32px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .title-group { display: flex; align-items: center; gap: 12px; }
+        .title-group svg { color: #38bdf8; }
+        .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+
+        .badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: #7dd3fc;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .header p { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+        .content { padding: 28px 32px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .content, .header { padding: 22px 20px; }
+        }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+        .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; line-height: 1.4; }
+        .input-wrap { position: relative; }
+
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--text-main);
+            background: #f8fafc;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px;
+        }
+
+        .alarm-card {
+            background: #fef2f2;
+            border: 1.5px solid #fecaca;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .alarm-info { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 220px; }
+        .alarm-info input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--danger); cursor: pointer; }
+        .alarm-title { font-size: 14px; font-weight: 700; color: #991b1b; }
+        .alarm-desc { font-size: 12px; color: #b91c1c; margin-top: 2px; line-height: 1.4; }
+
+        .btn-test {
+            background: #ffffff;
+            color: #dc2626;
+            border: 1.5px solid #fca5a5;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-test:hover { background: #fee2e2; }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-1px); }
+
+        /* HASIL LINK & QR CODE */
+        .result-box {
+            display: none;
+            margin-top: 24px;
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            gap: 20px;
+            align-items: center;
+        }
+        @media (max-width: 620px) { .result-grid { grid-template-columns: 1fr; } }
+
+        .link-display {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+        .btn-sm {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: white;
+        }
+        .btn-copy-link { background: #334155; }
+        .btn-open-link { background: var(--success); }
+
+        .qr-card {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+        }
+        #qrCanvas { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+        .btn-qr-dl {
+            margin-top: 10px;
+            width: 100%;
+            padding: 9px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .warn-local {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            line-height: 1.45;
+            display: none;
+        }
+
+        details { margin-top: 18px; border-top: 1px dashed var(--border); padding-top: 14px; }
+        summary { font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+        textarea {
+            width: 100%; height: 110px; margin-top: 10px; padding: 10px;
+            font-family: monospace; font-size: 11px; background: #0f172a;
+            color: #94a3b8; border-radius: 8px; border: 1px solid #334155;
+        }
+
+        /* ==================== MODE UJIAN SISWA (LOCKDOWN + ALARM) ==================== */
+        #examApp { display: none; width: 100%; height: 100vh; overflow: hidden; }
+        #f { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; overflow-y: scroll; -webkit-overflow-scrolling: touch; background: #fff; }
+        iframe { width: 100%; min-height: 100%; height: auto; border: none; display: block; }
+        #s, #b { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+        #s { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .cd { background: #fff; width: 100%; max-width: 420px; border-radius: 20px; padding: 28px 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.5); text-align: center; }
+        .ic { width: 56px; height: 56px; border-radius: 16px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+        .cd h2 { font-size: 20px; color: #0f172a; margin-bottom: 6px; }
+        .sub { font-size: 13px; color: #64748b; margin-bottom: 18px; }
+        .r { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; text-align: left; margin-bottom: 20px; }
+        .r li { font-size: 13px; color: #334155; margin-bottom: 8px; line-height: 1.45; margin-left: 16px; }
+        .r li:last-child { margin-bottom: 0; }
+        .bd { display: inline-block; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+        .btn-ex { width: 100%; padding: 14px; font-size: 15px; cursor: pointer; border-radius: 12px; border: none; font-weight: 700; }
+        .g { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 10px 15px -3px rgba(16,185,129,.35); }
+        #b { background: #991b1b; color: #fff; display: none; flex-direction: column; text-align: center; animation: fl .55s infinite alternate; }
+        @keyframes fl { from { background: #b91c1c; } to { background: #450a0a; } }
+        .lk-ic { width: 76px; height: 76px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; animation: pl 1s infinite; }
+        @keyframes pl { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        #b h2 { font-size: 24px; letter-spacing: .03em; margin-bottom: 8px; }
+        #b p { font-size: 14px; color: #fecaca; max-width: 320px; line-height: 1.5; margin-bottom: 24px; }
+        .z { background: #fff; color: #991b1b; max-width: 240px; box-shadow: 0 10px 25px rgba(0,0,0,.3); }
+    </style>
+</head>
+<body>
+
+<!-- ==================== TAMPILAN GENERATOR (GURU) ==================== -->
+<div id="genApp">
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <div class="title-group">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <h1>ExamGuard Generator V.11</h1>
+                </div>
+                <span class="badge">DIRECT LINK + QR ALARM</span>
+            </div>
+            <p>Generate langsung menjadi <b>Link Ujian Terkunci + QR Code Siap Pindai</b> yang otomatis mengaktifkan penguncian layar dan sirine alarm saat dibuka siswa.</p>
+        </div>
+
+        <div class="content">
+            <div id="localWarn" class="warn-local">
+                <b>Mode Lokal Terdeteksi:</b> File ini sedang dibuka dari penyimpanan HP/Laptop (<code>file://</code>). Agar QR Code bisa dipindai siswa, unggah file HTML ini terlebih dahulu ke hosting (GitHub Pages/Netlify/Blogger), atau masukkan alamat URL hosting file ini di kolom bawah:
+                <input type="text" id="hostBase" placeholder="https://username.github.io/ujian.html" style="margin-top:8px; background:#fff;">
+            </div>
+
+            <div class="form-group">
+                <label>1. Link Google Form Ujian</label>
+                <input type="text" id="url" placeholder="https://docs.google.com/forms/d/e/...">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>2. Password Guru (Pembuka Kunci)</label>
+                    <div class="input-wrap">
+                        <input type="password" id="pass" placeholder="Masukkan password...">
+                        <button type="button" class="toggle-pass" id="btnToggle" onclick="togglePass()">Lihat</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>3. Batas Toleransi Pelanggaran</label>
+                    <select id="limit">
+                        <option value="1">1 Kali (Langsung Terkunci)</option>
+                        <option value="2" selected>2 Kali (Standar)</option>
+                        <option value="3">3 Kali (Longgar)</option>
+                        <option value="5">5 Kali (Sangat Longgar)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>4. ID / Judul Sesi Ujian (Tampil di Bawah QR)</label>
+                <div class="desc">Ganti kode ini setiap pelaksanaan ujian baru agar riwayat kunci sebelumnya ter-reset.</div>
+                <input type="text" id="key" value="UH_INFORMATIKA_01">
+            </div>
+
+            <div class="alarm-card">
+                <div class="alarm-info">
+                    <input type="checkbox" id="alarm" checked>
+                    <div>
+                        <div class="alarm-title">Alarm Sirine Keras & Getar Otomatis</div>
+                        <div class="alarm-desc">Sirine berbunyi keras dan HP bergetar terus-menerus saat siswa melanggar batas toleransi.</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-test" onclick="testAlarm()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                    Tes Suara
+                </button>
+            </div>
+
+            <button type="button" class="btn-primary" onclick="generateAll()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                GENERATE LINK UJIAN & QR CODE
+            </button>
+
+            <!-- HASIL LINK TERKUNCI & QR CODE -->
+            <div id="resultBox" class="result-box">
+                <div class="result-grid">
+                    <div>
+                        <label>Link Ujian Siap Pakai (Sudah Terkunci + Alarm)</label>
+                        <div class="desc">Bagikan link ini atau tampilkan QR Code di samping agar siswa langsung masuk ke halaman pengawas ujian.</div>
+                        <input type="text" id="readyLink" class="link-display" readonly>
+                        
+                        <div class="btn-row">
+                            <button type="button" class="btn-sm btn-copy-link" id="btnCopyLink" onclick="copyReadyLink()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                <span>Copy Link Ujian</span>
+                            </button>
+                            <button type="button" class="btn-sm btn-open-link" onclick="previewExamLink()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                <span>Uji Coba Link</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="qr-card">
+                        <div id="qrTemp" style="display:none;"></div>
+                        <canvas id="qrCanvas"></canvas>
+                        <button type="button" class="btn-qr-dl" onclick="downloadQR()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download QR (.PNG)
+                        </button>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>Opsi Cadangan: Unduh File HTML Mandiri Terpisah</summary>
+                    <textarea id="standaloneCode" readonly></textarea>
+                    <button type="button" class="btn-sm btn-copy-link" style="margin-top:8px; width:100%;" onclick="downloadStandalone()">Download File .HTML Mandiri</button>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== TAMPILAN UJIAN SISWA (OTOMATIS AKTIF DARI QR/LINK) ==================== -->
+<div id="examApp">
+    <div id="s">
+        <div class="cd">
+            <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <h2>TATA TERTIB UJIAN</h2>
+            <p class="sub" id="examTitleSub">Sistem Pengawas Aktif</p>
+            <div class="r">
+                <ul>
+                    <li>Dilarang keluar halaman, membuka aplikasi lain, atau layar terbagi (<i>split screen</i>).</li>
+                    <li>Batas toleransi pelanggaran: <span class="bd" id="examLimitBadge">2x</span></li>
+                    <li>Melebihi batas akan otomatis <b>MENGUNCI LAYAR</b> & membunyikan alarm.</li>
+                </ul>
+            </div>
+            <button type="button" class="btn-ex g" onclick="go()">MULAI UJIAN</button>
+        </div>
+    </div>
+
+    <div id="b" onclick="_0rs()">
+        <div class="lk-ic"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h2>UJIAN TERKUNCI</h2>
+        <p>Anda terdeteksi meninggalkan halaman ujian melebihi batas toleransi. Silakan lapor kepada pengawas.</p>
+        <button type="button" class="btn-ex z" onclick="event.stopPropagation();rst()">BUKA AKSES (GURU)</button>
+    </div>
+
+    <div id="f" style="display:none"><iframe id="ifrm" src=""></iframe></div>
+</div>
+
+<script>
+    var _0x = "", _0h = 0, _0k = "ujian_01", _0m = 2, _0c = 0, _0a = false, _0lk = false, _0al = true, _0ac = null, _0iv = null, _0vb = null;
+
+    function _hs(s) {
+        var h = 0, i, c;
+        if (!s || s.length === 0) return h;
+        for (i = 0; i < s.length; i++) {
+            c = s.charCodeAt(i);
+            h = ((h << 5) - h) + c;
+            h |= 0;
+        }
+        return h;
+    }
+
+    function encodePayload(obj) {
+        var json = JSON.stringify(obj);
+        var b64 = btoa(unescape(encodeURIComponent(json)));
+        return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function decodePayload(str) {
+        try {
+            var b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (b64.length % 4) b64 += '=';
+            var json = decodeURIComponent(escape(atob(b64)));
+            return JSON.parse(json);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    window.addEventListener("DOMContentLoaded", function() {
+        var hash = window.location.hash;
+        if (hash && hash.indexOf("#s=") === 0) {
+            var cfg = decodePayload(hash.substring(3));
+            if (cfg && cfg.u) {
+                initExamMode(cfg);
+                return;
+            }
+        }
+        // Mode Generator
+        if (window.location.protocol === "file:") {
+            document.getElementById("localWarn").style.display = "block";
+            var savedHost = localStorage.getItem("eg_host_base");
+            if (savedHost) document.getElementById("hostBase").value = savedHost;
+        }
+    });
+
+    /* ==================== LOGIKA MODE UJIAN SISWA ==================== */
+    function initExamMode(cfg) {
+        document.getElementById("genApp").style.display = "none";
+        document.getElementById("examApp").style.display = "block";
+
+        _0x = cfg.u;
+        _0h = cfg.p;
+        _0k = cfg.k || "ujian_01";
+        _0m = parseInt(cfg.l, 10) || 2;
+        _0al = (cfg.a === 1);
+
+        document.getElementById("examTitleSub").textContent = "Sesi: " + _0k;
+        document.getElementById("examLimitBadge").textContent = _0m + "x";
+
+        document.addEventListener("contextmenu", function(e) { e.preventDefault(); });
+        document.addEventListener("keydown", function(e) {
+            if (e.ctrlKey || e.key === "F12") e.preventDefault();
+        });
+
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden && _0a) {
+                _0c++;
+                if (_0c >= _0m) {
+                    lck();
+                } else {
+                    _0bp(880, 0.4);
+                    if ("vibrate" in navigator) navigator.vibrate(400);
+                    alert("PERINGATAN! Dilarang meninggalkan halaman ujian (" + _0c + "/" + _0m + ")");
+                }
+            } else if (!document.hidden && _0lk) {
+                _0rs();
+            }
+        });
+
+        window.addEventListener("focus", function() { if (_0lk) _0rs(); });
+
+        if (localStorage.getItem(_0k) === "1") lck();
+    }
+
+    function _0ia() {
+        if (!_0al) return;
+        try {
+            if (!_0ac) {
+                var A = window.AudioContext || window.webkitAudioContext;
+                if (A) _0ac = new A();
+            }
+            if (_0ac && _0ac.state === "suspended") _0ac.resume();
+        } catch (e) {}
+    }
+
+    function _0bp(fq, du) {
+        if (!_0al) return;
+        try {
+            _0ia();
+            var o = _0ac.createOscillator(), g = _0ac.createGain();
+            o.type = "sawtooth";
+            o.frequency.value = fq;
+            g.gain.value = 1.0;
+            o.connect(g);
+            g.connect(_0ac.destination);
+            o.start();
+            o.stop(_0ac.currentTime + du);
+        } catch (e) {}
+    }
+
+    function _0alm() {
+        if (!_0al) return;
+        if ("vibrate" in navigator) {
+            navigator.vibrate([600, 200, 600, 200]);
+            if (!_0vb) _0vb = setInterval(function() { navigator.vibrate([600, 200, 600, 200]); }, 1800);
+        }
+        _0ia();
+        if (!_0iv) {
+            var t = 0;
+            _0iv = setInterval(function() {
+                _0bp((t % 2 === 0) ? 950 : 1350, 0.35);
+                t++;
+            }, 400);
+        }
+    }
+
+    function _0stp() {
+        if (_0iv) { clearInterval(_0iv); _0iv = null; }
+        if (_0vb) { clearInterval(_0vb); _0vb = null; }
+        if ("vibrate" in navigator) navigator.vibrate(0);
+    }
+
+    function _0rs() {
+        if (_0lk) {
+            _0ia();
+            if ("vibrate" in navigator) navigator.vibrate([600, 200, 600, 200]);
+        }
+    }
+
+    function go() {
+        if (localStorage.getItem(_0k) === "1") { lck(); return; }
+        _0ia();
+        document.getElementById("ifrm").src = _0x;
+        _0a = true;
+        document.getElementById("s").style.display = "none";
+        document.getElementById("f").style.display = "block";
+        fs();
+    }
+
+    function lck() {
+        _0a = false;
+        _0lk = true;
+        localStorage.setItem(_0k, "1");
+        document.getElementById("s").style.display = "none";
+        document.getElementById("f").style.display = "none";
+        document.getElementById("b").style.display = "flex";
+        document.getElementById("ifrm").src = "";
+        exfs();
+        _0alm();
+    }
+
+    function rst() {
+        var p = prompt("Masukkan Akses Guru:");
+        if (_hs(p) === _0h) {
+            _0stp();
+            _0lk = false;
+            localStorage.removeItem(_0k);
+            location.reload();
+        } else if (p !== null) {
+            alert("Akses Ditolak!");
+        }
+    }
+
+    function fs() {
+        var e = document.documentElement;
+        if (e.requestFullscreen) e.requestFullscreen();
+        else if (e.webkitRequestFullscreen) e.webkitRequestFullscreen();
+    }
+
+    function exfs() {
+        if (document.exitFullscreen) document.exitFullscreen();
+    }
+
+    /* ==================== LOGIKA MODE GENERATOR (GURU) ==================== */
+    function togglePass() {
+        var x = document.getElementById("pass");
+        var btn = document.getElementById("btnToggle");
+        x.type = (x.type === "password") ? "text" : "password";
+        btn.textContent = (x.type === "password") ? "Lihat" : "Sembunyi";
+    }
+
+    function testAlarm() {
+        try {
+            var A = window.AudioContext || window.webkitAudioContext;
+            var ctx = new A();
+            [950, 1350, 950, 1350].forEach(function(fq, idx) {
+                var o = ctx.createOscillator(), g = ctx.createGain();
+                o.type = "sawtooth";
+                o.frequency.value = fq;
+                g.gain.value = 0.6;
+                o.connect(g);
+                g.connect(ctx.destination);
+                o.start(ctx.currentTime + (idx * 0.25));
+                o.stop(ctx.currentTime + (idx * 0.25) + 0.22);
+            });
+            if ("vibrate" in navigator) navigator.vibrate([300, 100, 300]);
+        } catch (e) {
+            alert("Browser tidak mendukung tes audio.");
+        }
+    }
+
+    function generateAll() {
+        var url = document.getElementById("url").value.trim();
+        var pass = document.getElementById("pass").value.trim();
+        var key = document.getElementById("key").value.trim();
+        var limit = parseInt(document.getElementById("limit").value, 10);
+        var alarm = document.getElementById("alarm").checked ? 1 : 0;
+
+        if (!url || !pass || !key) {
+            alert("Harap lengkapi Link Google Form, Password Guru, dan ID Sesi Ujian!");
+            return;
+        }
+
+        var baseUrl = window.location.href.split("#")[0].split("?")[0];
+        if (window.location.protocol === "file:") {
+            var customBase = document.getElementById("hostBase").value.trim();
+            if (customBase) {
+                baseUrl = customBase.split("#")[0];
+                localStorage.setItem("eg_host_base", baseUrl);
+            }
+        }
+
+        var payload = encodePayload({
+            u: url,
+            p: _hs(pass),
+            k: key,
+            l: limit,
+            a: alarm
+        });
+
+        var finalExamUrl = baseUrl + "#s=" + payload;
+        document.getElementById("readyLink").value = finalExamUrl;
+        document.getElementById("resultBox").style.display = "block";
+
+        renderQR(finalExamUrl, key.toUpperCase());
+        buildStandaloneHtml(url, _hs(pass), key, limit, alarm === 1);
+    }
+
+    function renderQR(link, labelText) {
+        var tempDiv = document.getElementById("qrTemp");
+        var canvas = document.getElementById("qrCanvas");
+        tempDiv.innerHTML = "";
+
+        var qrSize = 320;
+        new QRCode(tempDiv, {
+            text: link,
+            width: qrSize,
+            height: qrSize,
+            colorDark: "#0f172a",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        setTimeout(function() {
+            var srcCanvas = tempDiv.querySelector("canvas");
+            var srcImg = tempDiv.querySelector("img");
+            var pad = 28;
+            var labelHeight = labelText ? 44 : 10;
+
+            canvas.width = qrSize + (pad * 2);
+            canvas.height = qrSize + (pad * 2) + labelHeight;
+
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (srcCanvas) ctx.drawImage(srcCanvas, pad, pad, qrSize, qrSize);
+            else if (srcImg) ctx.drawImage(srcImg, pad, pad, qrSize, qrSize);
+
+            if (labelText) {
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 20px system-ui, -apple-system, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(labelText, canvas.width / 2, qrSize + pad + 32);
+            }
+        }, 60);
+    }
+
+    function copyReadyLink() {
+        var inp = document.getElementById("readyLink");
+        inp.select();
+        inp.setSelectionRange(0, 99999);
+        navigator.clipboard ? navigator.clipboard.writeText(inp.value) : document.execCommand("copy");
+
+        var btn = document.getElementById("btnCopyLink");
+        var span = btn.querySelector("span");
+        span.textContent = "Tersalin!";
+        btn.style.background = "#10b981";
+        setTimeout(function() {
+            span.textContent = "Copy Link Ujian";
+            btn.style.background = "";
+        }, 2000);
+    }
+
+    function previewExamLink() {
+        var link = document.getElementById("readyLink").value;
+        if (link) window.open(link, "_blank");
+    }
+
+    function downloadQR() {
+        var canvas = document.getElementById("qrCanvas");
+        var key = document.getElementById("key").value.trim() || "qr_ujian";
+        var fileName = key.toLowerCase().replace(/[^a-z0-9_-]/g, "_") + "_qr.png";
+
+        var a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function buildStandaloneHtml(url, hashPass, key, limit, alarmBool) {
+        var hexUrl = "";
+        for (var i = 0; i < url.length; i++) {
+            hexUrl += "\\x" + url.charCodeAt(i).toString(16);
+        }
+        var tpl = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"><title>Ujian</title><style>*{box-sizing:border-box;margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden;background:#0f172a;font-family:system-ui,sans-serif}#f{position:fixed;inset:0;width:100%;height:100%;z-index:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;background:#fff}iframe{width:100%;min-height:100%;border:none;display:block}#s,#b{position:fixed;inset:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}#s{background:linear-gradient(135deg,#0f172a,#1e293b)}.cd{background:#fff;width:100%;max-width:420px;border-radius:20px;padding:28px 24px;text-align:center}.r{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;text-align:left;margin:16px 0 20px}.r li{font-size:13px;color:#334155;margin-bottom:8px;margin-left:16px}button{width:100%;padding:14px;font-size:15px;cursor:pointer;border-radius:12px;border:none;font-weight:700}.g{background:#10b981;color:#fff}#b{background:#991b1b;color:#fff;display:none;flex-direction:column;text-align:center;animation:fl .55s infinite alternate}@keyframes fl{from{background:#b91c1c}to{background:#450a0a}}.z{background:#fff;color:#991b1b;max-width:240px;margin-top:20px}</style></head><body><div id="s"><div class="cd"><h2>TATA TERTIB UJIAN</h2><div class="r"><ul><li>Dilarang pindah aplikasi.</li><li>Batas toleransi: <b>${limit}x</b></li><li>Lebih dari itu: <b>TERKUNCI & ALARM</b></li></ul></div><button class="g" onclick="go()">MULAI UJIAN</button></div></div><div id="b" onclick="_0rs()"><h2>UJIAN TERKUNCI</h2><p style="margin-top:8px">Melanggar batas toleransi.</p><button class="z" onclick="event.stopPropagation();rst()">BUKA AKSES (GURU)</button></div><div id="f" style="display:none"><iframe id="ifrm" src=""></iframe></div><script>var _0x="${hexUrl}",_0h=${hashPass},_0k="${key}",_0m=${limit},_0c=0,_0a=false,_0lk=false,_0al=${alarmBool},_0ac=null,_0iv=null,_0vb=null;function _hs(s){var h=0,i,c;if(!s||s.length===0)return h;for(i=0;i<s.length;i++){c=s.charCodeAt(i);h=((h<<5)-h)+c;h|=0}return h}function _0ia(){if(!_0al)return;try{if(!_0ac){var A=window.AudioContext||window.webkitAudioContext;if(A)_0ac=new A()}if(_0ac&&_0ac.state==="suspended")_0ac.resume()}catch(e){}}function _0bp(fq,du){if(!_0al)return;try{_0ia();var o=_0ac.createOscillator(),g=_0ac.createGain();o.type="sawtooth";o.frequency.value=fq;g.gain.value=1.0;o.connect(g);g.connect(_0ac.destination);o.start();o.stop(_0ac.currentTime+du)}catch(e){}}function _0alm(){if(!_0al)return;if("vibrate"in navigator){navigator.vibrate([600,200,600,200]);if(!_0vb)_0vb=setInterval(function(){navigator.vibrate([600,200,600,200])},1800)}_0ia();if(!_0iv){var t=0;_0iv=setInterval(function(){_0bp((t%2===0)?950:1350,0.35);t++},400)}}function _0stp(){if(_0iv){clearInterval(_0iv);_0iv=null}if(_0vb){clearInterval(_0vb);_0vb=null}if("vibrate"in navigator)navigator.vibrate(0)}function _0rs(){if(_0lk){_0ia();if("vibrate"in navigator)navigator.vibrate([600,200,600,200])}}window.onload=function(){if(localStorage.getItem(_0k)=="1")lck()};function go(){if(localStorage.getItem(_0k)=="1"){lck();return}_0ia();document.getElementById("ifrm").src=_0x;_0a=true;document.getElementById("s").style.display="none";document.getElementById("f").style.display="block";fs()}function lck(){_0a=false;_0lk=true;localStorage.setItem(_0k,"1");document.getElementById("s").style.display="none";document.getElementById("f").style.display="none";document.getElementById("b").style.display="flex";document.getElementById("ifrm").src="";exfs();_0alm()}function rst(){var p=prompt("Akses Guru:");if(_hs(p)===_0h){_0stp();_0lk=false;localStorage.removeItem(_0k);location.reload()}else if(p!==null){alert("Akses Ditolak!")}}document.addEventListener("visibilitychange",function(){if(document.hidden&&_0a){_0c++;if(_0c>=_0m){lck()}else{_0bp(880,0.4);if("vibrate"in navigator)navigator.vibrate(400);alert("PERINGATAN! ("+_0c+"/"+_0m+")")}}else if(!document.hidden&&_0lk){_0rs()}});window.addEventListener("focus",function(){if(_0lk)_0rs()});function fs(){var e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen();else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen()}function exfs(){if(document.exitFullscreen)document.exitFullscreen()}document.addEventListener("contextmenu",e=>e.preventDefault());document.addEventListener("keydown",e=>{if(e.ctrlKey||e.key=="F12")e.preventDefault()});<\/script></body></html>`;
+        document.getElementById("standaloneCode").value = tpl;
+    }
+
+    function downloadStandalone() {
+        var code = document.getElementById("standaloneCode").value;
+        var key = document.getElementById("key").value.trim() || "ujian";
+        var blob = new Blob([code], { type: "text/html;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = key + ".html";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
